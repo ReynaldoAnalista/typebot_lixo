@@ -1,22 +1,36 @@
 const express = require('express');
 const app = express();
 const router = express.Router();
-const mysql = require('mysql2');
+// const mysql = require('mysql2');
 const bodyParser = require('body-parser');
+const mysql = require('mysql2/promise');
 require('dotenv').config(); // Importa e configura o dotenv
 
 app.use(bodyParser.json());
 
 // Configuração da conexão com o banco de dados MySQL usando variáveis de ambiente
-const db = mysql.createConnection({
+// const db = mysql.createConnection({
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DB_NAME,
+// });
+
+const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
+const connection = await pool.getConnection();
+
+
 // Conectar ao banco de dados
-db.connect((err) => {
+connection.connect((err) => {
   if (err) {
     console.error('Erro ao conectar ao banco de dados:', err);
   } else {
@@ -38,7 +52,7 @@ router.post('/set_data', function (req, res, next) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(query, [FUNCIONARIO, CLIENTE, DATA, UNIDADE, QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, IDPESAGEM], (err, results) => {
+  connection.query(query, [FUNCIONARIO, CLIENTE, DATA, UNIDADE, QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, IDPESAGEM], (err, results) => {
     if (err) {
       console.error('Erro ao inserir a pesagem:', err);
       res.status(500).send('Erro ao inserir a pesagem');
@@ -52,7 +66,7 @@ router.post('/set_data', function (req, res, next) {
 router.get('/get_data', function (req, res, next) {
   const query = 'SELECT * FROM pesagem';
 
-  db.query(query, (err, results) => {
+  connection.query(query, (err, results) => {
     if (err) {
       console.error('Erro ao buscar dados:', err);
       res.status(500).send('Erro ao buscar dados');
