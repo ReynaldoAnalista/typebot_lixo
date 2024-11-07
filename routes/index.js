@@ -53,6 +53,24 @@ router.post('/set_data', async function (req, res, next) {
   }
 });
 
+router.post('/drop_data', async function (req, res, next) {
+
+  const query = `
+    DELETE FROM pesagem WHERE 1=1`;
+
+  let connection;
+  try {
+    connection = await pool.getConnection(); // Obtém uma conexão do pool
+    await connection.query(query);
+    res.status(201).send('Pesagem REMOVIDAS');
+  } catch (err) {
+    console.error('Erro ao remover a pensagem:', err);
+    res.status(500).send('Erro ao remover a pensagem');
+  } finally {
+    if (connection) connection.release(); // Libera a conexão de volta ao pool
+  }
+})
+
 /* GET para buscar dados da tabela pesagem */
 router.get('/get_data', async function (req, res, next) {
   const query = 'SELECT * FROM pesagem';
