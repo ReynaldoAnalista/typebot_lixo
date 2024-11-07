@@ -27,13 +27,10 @@ router.get('/', function (req, res, next) {
 router.post('/set_data', async function (req, res, next) {
   const dataArray = req.body.ArrayLixo;
 
-  // Verifica se dataArray existe, é um array e possui pelo menos um elemento
+  // Verifica se dataArray existe e é um array
   if (!Array.isArray(dataArray) || dataArray.length === 0) {
-    return res.status(400).send('Formato inválido: ArrayLixo deve ser um array contendo uma string.');
+    return res.status(400).send('Formato inválido: ArrayLixo deve ser um array contendo strings.');
   }
-
-  // Divide a string em dataArray[0] usando a vírgula como separador
-  const [QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, FUNCIONARIO, CLIENTE, UNIDADE, DATA, IDPESAGEM] = dataArray[0].split(',');
 
   const query = `
     INSERT INTO pesagem (FUNCIONARIO, CLIENTE, DATA, UNIDADE, QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, IDPESAGEM) 
@@ -43,8 +40,15 @@ router.post('/set_data', async function (req, res, next) {
   let connection;
   try {
     connection = await pool.getConnection(); // Obtém uma conexão do pool
-    await connection.query(query, [FUNCIONARIO, CLIENTE, DATA, UNIDADE, QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, IDPESAGEM]);
-    res.status(201).send('Pesagem inserida com sucesso');
+
+    // Itera sobre o array, processa e insere cada string individualmente
+    for (const item of dataArray) {
+      const [QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, FUNCIONARIO, CLIENTE, UNIDADE, DATA, IDPESAGEM] = item.split(',');
+
+      await connection.query(query, [FUNCIONARIO, CLIENTE, DATA, UNIDADE, QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, IDPESAGEM]);
+    }
+
+    res.status(201).send('Pesagens inseridas com sucesso');
   } catch (err) {
     console.error('Erro ao inserir a pesagem:', err);
     res.status(500).send('Erro ao inserir a pesagem');
@@ -52,6 +56,7 @@ router.post('/set_data', async function (req, res, next) {
     if (connection) connection.release(); // Libera a conexão de volta ao pool
   }
 });
+
 
 router.post('/drop_data', async function (req, res, next) {
 
