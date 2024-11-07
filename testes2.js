@@ -1,36 +1,41 @@
 const dataEntries = [
-    ["11", "22", "PLÁSTICO", "https://s3.typebot.io/public/tmp/cm33b44ls0001uhwuytcr54el/DINHEIRO.jpg"],
-    ["33", "55", "PAPEL MISTO", "https://s3.typebot.io/public/tmp/cm33b44ls0001uhwuytcr54el/chave%20binance.png"]
+  ["33,44,PLÁSTICO,https://s3.typebot.io/public/tmp/cm33b44ls0001uhwuytcr54el/golias.jpg,FUNCIONARIO 01,EMPRESA RED,BETA ,06/11/2024 13:15,ID-151917"]
   ];
   
-  const sendData = async (entries) => {
+
+const sendData = async (entries) => {
     for (const entry of entries) {
-      const [valorPesado, quantidade, tipo, imagem] = entry;
+      const [valorPesado, quantidade, tipo, imagem, funcionario, unidade, cliente, data, idpesagem] = entry;
   
       const payload = {
-        FUNCIONARIO: "PEDRO",
-        CLIENTE: "CLIENT01",
-        DATA: "01/08/2024",
-        UNIDADE: "CENTRO",
+        FUNCIONARIO: funcionario,
+        CLIENTE: cliente,
+        DATA: data,
+        UNIDADE: unidade,
         QTD_SACOS: quantidade,
         VALOR_PESADO: valorPesado,
         TIPO: tipo,
         IMAGEM: imagem,
-        IDPESAGEM: `ID-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
+        IDPESAGEM: idpesagem
       };
   
       try {
         const response = await fetch("https://testrey.tech/set_data", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            "User-Agent": "insomnia/10.1.1"
+            "Content-Type": "application/json"
           },
           body: JSON.stringify(payload)
         });
   
         if (response.ok) {
-          const data = await response.json();
+          // Tenta analisar como JSON, caso contrário, captura o texto
+          let data;
+          try {
+            data = await response.json();
+          } catch (error) {
+            data = await response.text(); // Captura como texto se não for JSON válido
+          }
           console.log("Data sent successfully:", data);
         } else {
           console.error("Error sending data:", response.status, response.statusText);

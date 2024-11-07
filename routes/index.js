@@ -25,7 +25,10 @@ router.get('/', function (req, res, next) {
 
 /* POST para inserir dados na tabela pesagem */
 router.post('/set_data', async function (req, res, next) {
-  const { FUNCIONARIO, CLIENTE, DATA, UNIDADE, QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, IDPESAGEM } = req.body;
+  const dataArray = req.body.ArrayLixo; // Acessa o array enviado na propriedade ArrayLixo
+
+  // Extrai cada valor baseado em sua posição no array
+  const [QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, FUNCIONARIO, CLIENTE, UNIDADE, DATA, IDPESAGEM] = dataArray;
 
   const query = `
     INSERT INTO pesagem (FUNCIONARIO, CLIENTE, DATA, UNIDADE, QTD_SACOS, VALOR_PESADO, TIPO, IMAGEM, IDPESAGEM) 
@@ -44,6 +47,7 @@ router.post('/set_data', async function (req, res, next) {
     if (connection) connection.release(); // Libera a conexão de volta ao pool
   }
 });
+;
 
 /* GET para buscar dados da tabela pesagem */
 router.get('/get_data', async function (req, res, next) {
